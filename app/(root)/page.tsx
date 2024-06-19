@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 
 const HomePage = () => {
-  return <Button>Click me</Button>;
+  return <Button>Home</Button>;
 };
 
 export default HomePage;
