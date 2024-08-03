@@ -1,0 +1,32 @@
+import { InferRequestType, InferResponseType } from "hono";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { client } from "@/lib/hono";
+import { toast } from "sonner";
+
+type ResponseType = InferResponseType<
+  (typeof client.api.campaigns)["stop"][":id"]["$delete"]
+>;
+
+export const useStopCampaign = (id?: string) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<ResponseType, Error>({
+    mutationFn: async (json) => {
+      const response = await client.api.campaigns["stop"][":id"]["$delete"]({
+        param: { id },
+      });
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast.success("campaign stopped");
+      queryClient.invalidateQueries({ queryKey: ["campaign", { id }] });
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+    },
+    onError: () => {
+      toast.error("Failed to stop campaign");
+    },
+  });
+
+  return mutation;
+};
