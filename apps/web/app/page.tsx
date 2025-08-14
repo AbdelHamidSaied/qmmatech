@@ -4,6 +4,8 @@ import { headers } from 'next/headers'
 import { prisma } from '@pkg/db'
 import { getStoreSlugFromHost } from './lib/tenant'
 
+export const revalidate = 60
+
 export default async function HomePage() {
   const host = headers().get('host')
   const slug = getStoreSlugFromHost(host)
