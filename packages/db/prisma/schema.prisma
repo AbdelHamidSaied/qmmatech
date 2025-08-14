@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  name        String
+  slug        String    @unique
+  theme       String    @default("{}")
+  products    Product[]
+  users       User[]
+  orders      Order[]
+}
+
+model User {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  email       String   @unique
+  passwordHash String
+  role        String   @default("MERCHANT")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  title       String
+  description String
+  priceCents  Int
+  currency    String   @default("USD")
+  imageUrl    String?
+  active      Boolean  @default(true)
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  email       String
+  totalCents  Int
+  currency    String   @default("USD")
+  status      String   @default("PENDING")
+}
