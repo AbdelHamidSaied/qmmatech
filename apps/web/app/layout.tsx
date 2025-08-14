@@ -3,10 +3,11 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { headers } from 'next/headers'
 import { prisma } from '@pkg/db'
+import { getStoreSlugFromHost } from '../lib/tenant'
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const host = headers().get('host') || ''
-  const slug = host.split(':')[0].split('.')[0] || 'acme'
+  const host = headers().get('host')
+  const slug = getStoreSlugFromHost(host)
   const tenant = await prisma.tenant.findUnique({ where: { slug } })
 
   return (

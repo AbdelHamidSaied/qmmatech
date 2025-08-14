@@ -2,10 +2,11 @@ import Image from 'next/image'
 import { headers } from 'next/headers'
 import { prisma } from '@pkg/db'
 import Link from 'next/link'
+import { getStoreSlugFromHost } from '../../lib/tenant'
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
-  const host = headers().get('host') || ''
-  const slug = host.split(':')[0].split('.')[0] || 'acme'
+  const host = headers().get('host')
+  const slug = getStoreSlugFromHost(host)
 
   const product = await prisma.product.findFirst({
     where: { id: params.id, tenant: { slug } },

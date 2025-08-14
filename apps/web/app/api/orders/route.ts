@@ -1,10 +1,11 @@
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { prisma } from '@pkg/db'
+import { getStoreSlugFromHost } from '../../lib/tenant'
 
 export async function POST(req: Request) {
-  const host = headers().get('host') || ''
-  const slug = host.split(':')[0].split('.')[0] || 'acme'
+  const host = headers().get('host')
+  const slug = getStoreSlugFromHost(host)
   const { email, totalCents } = await req.json().catch(() => ({ email: '', totalCents: 0 }))
 
   const tenant = await prisma.tenant.findUnique({ where: { slug } })
