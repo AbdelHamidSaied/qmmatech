@@ -17,17 +17,6 @@ async function main() {
     },
   });
 
-  await prisma.user.upsert({
-    where: { email: 'admin@acme.com' },
-    update: {},
-    create: {
-      email: 'admin@acme.com',
-      passwordHash: password,
-      role: 'ADMIN',
-      tenantId: acme.id,
-    },
-  });
-
   const globex = await prisma.tenant.upsert({
     where: { slug: 'globex' },
     update: {},
@@ -41,15 +30,37 @@ async function main() {
     },
   });
 
-  await prisma.user.upsert({
+  const adminAcme = await prisma.user.upsert({
+    where: { email: 'admin@acme.com' },
+    update: { passwordHash: password },
+    create: {
+      email: 'admin@acme.com',
+      passwordHash: password,
+      role: 'ADMIN',
+    },
+  });
+
+  const adminGlobex = await prisma.user.upsert({
     where: { email: 'admin@globex.com' },
-    update: {},
+    update: { passwordHash: password },
     create: {
       email: 'admin@globex.com',
       passwordHash: password,
       role: 'ADMIN',
-      tenantId: globex.id,
     },
+  });
+
+  // memberships
+  await prisma.membership.upsert({
+    where: { userId_tenantId: { userId: adminAcme.id, tenantId: acme.id } },
+    update: { role: 'OWNER' },
+    create: { userId: adminAcme.id, tenantId: acme.id, role: 'OWNER' },
+  });
+
+  await prisma.membership.upsert({
+    where: { userId_tenantId: { userId: adminGlobex.id, tenantId: globex.id } },
+    update: { role: 'OWNER' },
+    create: { userId: adminGlobex.id, tenantId: globex.id, role: 'OWNER' },
   });
 
   const sampleProducts = [
